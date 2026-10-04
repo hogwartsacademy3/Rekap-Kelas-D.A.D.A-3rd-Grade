@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Keaktifan D.A.D.A | Hogwarts Institute</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Dark Monochrome Palette */
+            --bg-base: #080808;
+            --bg-surface: #121212;
+            --bg-surface-hover: #1e1e1e;
+            --border-subtle: #2a2a2a;
+            --border-strong: #404040;
+            
+            --text-primary: #f2f2f2;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            
+            --font-serif: 'EB Garamond', serif;
+            --font-sans: 'Inter', sans-serif;
+            
+            /* Optimized Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: var(--font-serif);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            z-index: 1000;
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color var(--transition-fast);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85); /* Backdrop filter dihapus agar lebih ringan */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-normal), visibility var(--transition-normal);
+            z-index: 900;
+            will-change: opacity;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 320px;
+            max-width: 85vw;
+            height: 100%;
+            background-color: var(--bg-surface);
+            border-left: 1px solid var(--border-subtle);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5); /* Shadow dikurangi sedikit */
+            transform: translateX(100%); /* Hardware Accelerated Animation */
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 950;
+            padding: 5rem 2rem 2rem;
+            overflow-y: auto;
+            will-change: transform;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .nav-item {
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.5rem 0;
+            transition: color var(--transition-fast);
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--text-primary);
+            display: inline-block;
+        }
+
+        .nav-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.25rem;
+        }
+
+        .sub-menu {
+            list-style: none;
+            padding-left: 1rem;
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .page-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+            flex: 1;
+            will-change: opacity, transform;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate3d(0, 10px, 0); } /* translate3d untuk render GPU */
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            line-height: 1.2;
+            letter-spacing: 0.1em;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+            font-family: var(--font-sans);
+        }
+
+        .section-desc {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .tabs-container {
+            margin-bottom: 2rem;
+        }
+
+        .tabs-header {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            border-bottom: 1px solid var(--border-subtle);
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .tabs-header::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1rem 0.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color var(--transition-fast), border-color var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+            will-change: opacity, transform;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .nav-card {
+            border: 1px solid var(--border-subtle);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+            background: var(--bg-surface);
+            will-change: transform;
+        }
+
+        .nav-card:hover {
+            background: var(--bg-surface-hover);
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+        }
+
+        .nav-card h3 {
+            font-family: var(--font-sans);
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-card p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-card {
+            border: 1px solid var(--border-subtle);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            background: var(--bg-surface);
+            transition: border-color var(--transition-fast);
+        }
+        
+        .summary-card:hover {
+            border-color: var(--border-strong);
+        }
+
+        .summary-value {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-strong);
+            padding-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-surface);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            min-width: 500px;
+        }
+
+        th, td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        th {
+            text-align: right;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            background: rgba(255,255,255,0.02);
+        }
+
+        td {
+            text-align: right;
+            color: var(--text-primary);
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: var(--bg-surface-hover);
+        }
+
+        .house-summary {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            text-align: center;
+        }
+
+        .house-summary-stats {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .house-summary-points {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .house-summary-total {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-strong);
+            padding-top: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .standings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .standing-card {
+            border: 1px solid var(--border-subtle);
+            padding: 2.5rem;
+            position: relative;
+            background: var(--bg-surface);
+            overflow: hidden;
+        }
+
+        .rank-number {
+            position: absolute;
+            top: -1rem;
+            left: 1.5rem;
+            font-family: var(--font-serif);
+            font-size: 5rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.03);
+            line-height: 1;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .standing-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .standing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-strong);
+            padding-bottom: 1rem;
+        }
+        
+        .standing-house {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            margin: 0;
+            letter-spacing: 0.1em;
+        }
+
+        .standing-total {
+            font-family: var(--font-sans);
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .standing-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 2px;
+            background: var(--border-subtle);
+            margin-top: 2rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--text-primary);
+            transition: width 1s ease-in-out;
+        }
+
+        .notes-section {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .notes-section h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+        }
+
+        .note-item h4 {
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            letter-spacing: 0.05em;
+        }
+
+        .note-item p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 3rem;
+            padding-bottom: 1rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .text-center { text-align: center; }
+        .mb-2 { margin-bottom: 2rem; }
+
+        @media (max-width: 600px) {
+            .page-title { font-size: 2rem; }
+            .standing-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .standing-details { flex-direction: column; gap: 0.5rem; }
+            .tabs-header { justify-content: flex-start; padding-bottom: 5px; }
+            .tab-btn { padding: 0.75rem 0.5rem; font-size: 0.75rem; }
+            .nav-card { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">☰</button>
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link active" data-target="home">HOME</a>
+            </li>
+            <li class="nav-item">
+                <div class="nav-label">RECAP</div>
+                <ul class="sub-menu">
+                    <li><a class="nav-link" data-target="week1">Week 1</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="standings">HOUSE STANDINGS</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="about">ABOUT</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="app-container">
+        <main>
+            <!-- HOME PAGE -->
+            <section id="home" class="page-section active">
+                <div style="margin-top: 4rem; margin-bottom: 4rem;">
+                    <h1 class="page-title">Hogwarts Institute</h1>
+                    <p class="page-subtitle">Defence Against the Dark Arts</p>
+                    
+                    <h2 class="text-center" style="font-size: 1.1rem; margin-bottom: 1.5rem; font-family: var(--font-sans); font-weight: 400; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-primary);">
+                        Individual Activity & House Points Record
+                    </h2>
+                    
+                    <p class="section-desc">
+                        A record of individual activity and House Points earned during Defence Against the Dark Arts classes.
+                    </p>
+                </div>
+
+                <div class="card-grid">
+                    <div class="nav-card" onclick="navigate('week1')">
+                        <h3>WEEK 1</h3>
+                        <p>2 October 2026</p>
+                    </div>
+                    <div class="nav-card" onclick="navigate('standings')">
+                        <h3>HOUSE STANDINGS</h3>
+                        <p>Week 1</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- WEEK 1 PAGE -->
+            <section id="week1" class="page-section">
+                <h1 class="page-title">Rekap Keaktifan Individu</h1>
+                <p class="page-subtitle">Defence Against the Dark Arts</p>
+                
+                <div class="text-center mb-2" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.5rem;">
+                    <span style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--text-secondary); letter-spacing: 0.1em;">Week 1 | 2 October 2026</span>
+                </div>
+
+                <!-- Inner Navigation / Tabs -->
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="tab-overview">Overview</button>
+                        <button class="tab-btn" data-tab="tab-gryffindor">Gryffindor</button>
+                        <button class="tab-btn" data-tab="tab-ravenclaw">Ravenclaw</button>
+                        <button class="tab-btn" data-tab="tab-ranking">Rankings</button>
+                    </div>
+
+                    <!-- TAB 1: OVERVIEW -->
+                    <div id="tab-overview" class="tab-content active">
+                        <p class="section-desc">
+                            Rekap keaktifan dan perolehan poin peserta selama pelaksanaan kelas Defence Against the Dark Arts Week 1.
+                        </p>
+
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <div class="summary-value">9</div>
+                                <div class="summary-label">Total Peserta</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-value">30</div>
+                                <div class="summary-label">Total Jawaban</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-value">4</div>
+                                <div class="summary-label">Total Partisipasi</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-value">34</div>
+                                <div class="summary-label">Total Keaktifan</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-value">138</div>
+                                <div class="summary-label">Individual Points</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-value">15</div>
+                                <div class="summary-label">Attendance Bonus</div>
+                            </div>
+                            <div class="summary-card" style="border-color: var(--border-strong);">
+                                <div class="summary-value" style="color: #fff;">153</div>
+                                <div class="summary-label" style="color: var(--text-primary);">Total House Points</div>
+                            </div>
+                        </div>
+
+                        <h2 class="section-title">Total Rekap Seluruh Peserta</h2>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Keterangan</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Total Peserta</td><td>9</td></tr>
+                                    <tr><td>Total Jawaban</td><td>30</td></tr>
+                                    <tr><td>Total Partisipasi</td><td>4</td></tr>
+                                    <tr><td>Total Keaktifan</td><td>34</td></tr>
+                                    <tr><td>Individual Points</td><td>138</td></tr>
+                                    <tr><td>Attendance Bonus</td><td>15</td></tr>
+                                    <tr>
+                                        <td><strong style="color: var(--text-primary); font-weight: 600;">Total House Points</strong></td>
+                                        <td><strong style="color: var(--text-primary); font-weight: 600;">153</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="notes-section">
+                            <h3>Catatan Sistem Penilaian</h3>
+                            <div class="notes-grid">
+                                <div class="note-item">
+                                    <h4>Jawaban</h4>
+                                    <p>Keikutsertaan dalam menjawab pertanyaan atau quiz selama kelas.</p>
+                                </div>
+                                <div class="note-item">
+                                    <h4>Partisipasi</h4>
+                                    <p>Keaktifan di luar jawaban, dalam Week 1 berupa peserta yang mengajukan pertanyaan selama kelas.</p>
+                                </div>
+                                <div class="note-item">
+                                    <h4>Keaktifan</h4>
+                                    <p>Jumlah jawaban dan partisipasi. (Total Keaktifan = Jawaban + Partisipasi)</p>
+                                </div>
+                                <div class="note-item">
+                                    <h4>Individual Points</h4>
+                                    <p>Poin yang diperoleh masing-masing peserta selama kelas.</p>
+                                </div>
+                                <div class="note-item">
+                                    <h4>Attendance Bonus</h4>
+                                    <p>Bonus kehadiran yang ditambahkan ke total House Points.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: GRYFFINDOR -->
+                    <div id="tab-gryffindor" class="tab-content">
+                        <h2 class="section-title text-center">Gryffindor</h2>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Peserta</th>
+                                        <th>Jawaban</th>
+                                        <th>Partisipasi</th>
+                                        <th>Keaktifan</th>
+                                        <th>Poin</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Fajar</td><td>4</td><td>0</td><td>4</td><td>18</td></tr>
+                                    <tr><td>Almeavyora</td><td>4</td><td>1</td><td>5</td><td>18</td></tr>
+                                    <tr><td>Aileen</td><td>4</td><td>0</td><td>4</td><td>22</td></tr>
+                                    <tr><td>Leviys</td><td>3</td><td>1</td><td>4</td><td>15</td></tr>
+                                    <tr><td>Emma</td><td>3</td><td>0</td><td>3</td><td>13</td></tr>
+                                    <tr><td>Emlly</td><td>1</td><td>0</td><td>1</td><td>3</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="house-summary">
+                            <div class="house-summary-stats">19 Jawaban &middot; 2 Partisipasi &middot; 21 Keaktifan</div>
+                            <div class="house-summary-points">89 Individual Points</div>
+                            <div class="house-summary-points" style="font-size: 1.1rem; color: var(--text-secondary);">+10 Attendance Bonus</div>
+                            <div class="house-summary-total">99 Total House Points</div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: RAVENCLAW -->
+                    <div id="tab-ravenclaw" class="tab-content">
+                        <h2 class="section-title text-center">Ravenclaw</h2>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Peserta</th>
+                                        <th>Jawaban</th>
+                                        <th>Partisipasi</th>
+                                        <th>Keaktifan</th>
+                                        <th>Poin</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Mysha</td><td>4</td><td>1</td><td>5</td><td>20</td></tr>
+                                    <tr><td>Chelsea</td><td>4</td><td>1</td><td>5</td><td>16</td></tr>
+                                    <tr><td>Nyxielle</td><td>3</td><td>0</td><td>3</td><td>13</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="house-summary">
+                            <div class="house-summary-stats">11 Jawaban &middot; 2 Partisipasi &middot; 13 Keaktifan</div>
+                            <div class="house-summary-points">49 Individual Points</div>
+                            <div class="house-summary-points" style="font-size: 1.1rem; color: var(--text-secondary);">+5 Attendance Bonus</div>
+                            <div class="house-summary-total">54 Total House Points</div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: RANKING -->
+                    <div id="tab-ranking" class="tab-content">
+                        <h2 class="section-title text-center">Ranking Keaktifan Individu</h2>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Peserta</th>
+                                        <th style="text-align: left;">House</th>
+                                        <th>Keaktifan</th>
+                                        <th>Poin</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Almeavyora</td><td style="text-align: left; color: var(--text-secondary);">Gryffindor</td><td>5</td><td>18</td></tr>
+                                    <tr><td>Mysha</td><td style="text-align: left; color: var(--text-secondary);">Ravenclaw</td><td>5</td><td>20</td></tr>
+                                    <tr><td>Chelsea</td><td style="text-align: left; color: var(--text-secondary);">Ravenclaw</td><td>5</td><td>16</td></tr>
+                                    <tr><td>Fajar</td><td style="text-align: left; color: var(--text-secondary);">Gryffindor</td><td>4</td><td>18</td></tr>
+                                    <tr><td>Aileen</td><td style="text-align: left; color: var(--text-secondary);">Gryffindor</td><td>4</td><td>22</td></tr>
+                                    <tr><td>Leviys</td><td style="text-align: left; color: var(--text-secondary);">Gryffindor</td><td>4</td><td>15</td></tr>
+                                    <tr><td>Nyxielle</td><td style="text-align: left; color: var(--text-secondary);">Ravenclaw</td><td>3</td><td>13</td></tr>
+                                    <tr><td>Emma</td><td style="text-align: left; color: var(--text-secondary);">Gryffindor</td><td>3</td><td>13</td></tr>
+                                    <tr><td>Emlly</td><td style="text-align: left; color: var(--text-secondary);">Gryffindor</td><td>1</td><td>3</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div> <!-- End of tabs-container -->
+            </section>
+
+            <!-- STANDINGS PAGE -->
+            <section id="standings" class="page-section">
+                <h1 class="page-title">House Standings</h1>
+                <p class="page-subtitle">Week 1 | 2 October 2026</p>
+
+                <div class="standings-container">
+                    <!-- Gryffindor Card -->
+                    <div class="standing-card">
+                        <div class="rank-number">01</div>
+                        <div class="standing-content">
+                            <div class="standing-header">
+                                <h2 class="standing-house">GRYFFINDOR</h2>
+                                <span class="standing-total">99 House Points</span>
+                            </div>
+                            <div class="standing-details">
+                                <span>89 Individual Points</span>
+                                <span>+10 Attendance Bonus</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ravenclaw Card -->
+                    <div class="standing-card">
+                        <div class="rank-number">02</div>
+                        <div class="standing-content">
+                            <div class="standing-header">
+                                <h2 class="standing-house">RAVENCLAW</h2>
+                                <span class="standing-total">54 House Points</span>
+                            </div>
+                            <div class="standing-details">
+                                <span>49 Individual Points</span>
+                                <span>+5 Attendance Bonus</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <!-- Width calculated as (54/99) * 100 roughly 54.5% -->
+                                <div class="progress-bar-fill" style="width: 54.5%; background: var(--text-secondary);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABOUT PAGE -->
+            <section id="about" class="page-section">
+                <h1 class="page-title">About</h1>
+                <p class="page-subtitle">Website Information</p>
+                
+                <div style="max-width: 600px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+                    <p style="margin-bottom: 1.5rem; color: var(--text-primary);">
+                        Website ini merupakan halaman informasi rekap keaktifan peserta kelas Defence Against the Dark Arts di Hogwarts Institute.
+                    </p>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.1em;">Data mencakup:</p>
+                    <ul style="margin-bottom: 2rem; list-style: none; color: var(--text-muted); font-size: 0.95rem; line-height: 1.8;">
+                        <li>Jawaban peserta</li>
+                        <li>Partisipasi peserta</li>
+                        <li>Total keaktifan</li>
+                        <li>Individual Points</li>
+                        <li>Attendance Bonus</li>
+                        <li>House Points</li>
+                    </ul>
+                    <p style="color: var(--text-secondary); font-style: italic;">
+                        Website ini dibuat sebagai media informasi dan dokumentasi rekap kelas.
+                    </p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>HOGWARTS INSTITUTE</p>
+            <p style="margin: 0.5rem 0;">DEFENCE AGAINST THE DARK ARTS</p>
+            <p>WEEK 1 | 2 OCTOBER 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.page-section');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Toggle Sidebar Function
+        function toggleMenu() {
+            const isActive = sidebar.classList.contains('active');
+            
+            if (isActive) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                hamburgerBtn.innerHTML = '☰';
+                document.body.style.overflow = 'auto'; // restore scroll
+            } else {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+                hamburgerBtn.innerHTML = '&times;'; // close icon
+                document.body.style.overflow = 'hidden'; // prevent scroll when sidebar open
+            }
+        }
+
+        hamburgerBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Main Page Navigation Logic
+        function navigate(targetId) {
+            // Hide all sections
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show target section
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Update active state in sidebar nav
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.target === targetId) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Close sidebar if it's open
+            if (sidebar.classList.contains('active')) {
+                toggleMenu();
+            }
+
+            // Scroll to top smoothly
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Add event listeners to sidebar links
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.dataset.target;
+                if(targetId) {
+                    navigate(targetId);
+                }
+            });
+        });
+
+        // Inner Tab Navigation Logic (For Week 1 Page)
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding pane
+                btn.classList.add('active');
+                const targetTabId = btn.dataset.tab;
+                document.getElementById(targetTabId).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
